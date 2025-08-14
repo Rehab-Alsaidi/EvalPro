@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Results - EvalPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+            --warning-gradient: linear-gradient(135deg, #ffb347 0%, #ff8a65 100%);
+            --error-gradient: linear-gradient(135deg, #ff8a95 0%, #ff6b7d 100%);
+            --excellent-color: #56cc9d;
+            --proficient-color: #4facfe;
+            --developing-color: #ffb347;
+            --inadequate-color: #ff6b7d;
+            --dark-bg: #0a0e27;
+            --darker-bg: #070b1f;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a9c0;
+            --text-accent: #667eea;
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(ellipse at top left, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at bottom right, rgba(118, 75, 162, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at center, rgba(79, 172, 254, 0.03) 0%, transparent 70%);
+        }
+
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(102, 126, 234, 0.4);
+            border-radius: 50%;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 0.6; }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 15px 0;
+            background: rgba(10, 14, 39, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a, .btn {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 100px 40px 60px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .results-header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .results-title {
+            font-size: clamp(32px, 4vw, 42px);
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .filename-display {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Results Layout */
+        .results-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Score Overview Card */
+        .score-overview {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .score-overview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary-gradient);
+            opacity: 0.03;
+            z-index: -1;
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .score-chart-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+        }
+
+        .score-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Category Analysis */
+        .category-analysis {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px;
+            animation: slideInLeft 0.8s ease-out 0.2s both;
+        }
+
+        .categories-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .category-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .category-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: capitalize;
+        }
+
+        .category-score-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-score {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .score-excellent { color: var(--excellent-color); }
+        .score-proficient { color: var(--proficient-color); }
+        .score-developing { color: var(--developing-color); }
+        .score-inadequate { color: var(--inadequate-color); }
+
+        .category-level {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .level-excellent {
+            background: rgba(86, 204, 157, 0.2);
+            color: var(--excellent-color);
+            border: 1px solid rgba(86, 204, 157, 0.3);
+        }
+
+        .level-proficient {
+            background: rgba(79, 172, 254, 0.2);
+            color: var(--proficient-color);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+        }
+
+        .level-developing {
+            background: rgba(255, 179, 71, 0.2);
+            color: var(--developing-color);
+            border: 1px solid rgba(255, 179, 71, 0.3);
+        }
+
+        .level-inadequate {
+            background: rgba(255, 107, 125, 0.2);
+            color: var(--inadequate-color);
+            border: 1px solid rgba(255, 107, 125, 0.3);
+        }
+
+        .category-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 16px 0;
+            overflow: hidden;
+        }
+
+        .category-progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease-out;
+            position: relative;
+        }
+
+        .category-progress-fill.excellent {
+            background: var(--success-gradient);
+        }
+
+        .category-progress-fill.proficient {
+            background: var(--accent-gradient);
+        }
+
+        .category-progress-fill.developing {
+            background: var(--warning-gradient);
+        }
+
+        .category-progress-fill.inadequate {
+            background: var(--error-gradient);
+        }
+
+        .category-evidence {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-style: italic;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid var(--text-accent);
+        }
+
+        .category-feedback {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .certification-status {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .cert-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cert-certified {
+            background: var(--success-gradient);
+            color: white;
+            box-shadow: 0 8px 32px rgba(86, 204, 157, 0.3);
+        }
+
+        .cert-provisional {
+            background: var(--warning-gradient);
+            color: white;
+            box-shadow: 0 8px 32px rgba(255, 179, 71, 0.3);
+        }
+
+        .cert-not-certified {
+            background: var(--error-gradient);
+            color: white;
+            box-shadow: 0 8px 32px rgba(255, 107, 125, 0.3);
+        }
+
+        .cert-status-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* Summary Lists */
+        .summary-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .summary-list li:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .list-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .strengths .list-icon {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .gaps .list-icon {
+            background: var(--error-gradient);
+            color: white;
+        }
+
+        .priorities .list-icon {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .list-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* Technical Metrics */
+        .technical-metrics {
+            margin-top: 20px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Recommendations Section */
+        .recommendations-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px;
+            margin: 40px 0;
+            animation: fadeInUp 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recommendations-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(79, 172, 254, 0.05) 100%);
+            z-index: -1;
+        }
+
+        .recommendations-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .recommendations-content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Action Buttons */
+        .action-section {
+            text-align: center;
+            margin: 50px 0;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-new-assessment {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: var(--shadow-light);
+        }
+
+        .btn-new-assessment:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .results-layout {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .sidebar {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 80px 20px 40px;
+            }
+
+            .nav-container {
+                padding: 0 20px;
+            }
+
+            .nav-actions {
+                gap: 10px;
+            }
+
+            .nav-actions .btn {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            .score-overview, .category-analysis, .summary-card, .recommendations-section {
+                padding: 24px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Chart Animations */
+        .chart-animate {
+            animation: chartGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes chartGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(102, 126, 234, 0.3)); }
+            100% { filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.6)); }
+        }
+    </style>
+</head>
+<body class="loading">
+    <!-- Animated Background -->
+    <div class="bg-animation"></div>
+    <div class="bg-particles"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">EvalPro</a>
+            <div class="nav-actions">
+                <div class="nav-links">
+                    <a href="/">Home</a>
+                </div>
+                <a href="/upload" class="btn btn-primary">New Assessment</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Results Header -->
+        <div class="results-header">
+            <h1 class="results-title">Professional Assessment Results</h1>
+            {% if filename %}
+            <div class="filename-display">
+                <span>📹</span>
+                <span>{{ filename }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if evaluation %}
+        <!-- Results Layout -->
+        <div class="results-layout">
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Score Overview -->
+                <div class="score-overview">
+                    <div class="score-header">
+                        <h2 class="section-title">📊 Overall Assessment Score</h2>
+                    </div>
+                    <div class="score-chart-container">
+                        <canvas id="scoreChart" width="200" height="200"></canvas>
+                        <div class="score-value">
+                            <div class="score-number
+                                {% if evaluation.total_score >= 80 %}score-excellent
+                                {% elif evaluation.total_score >= 60 %}score-proficient
+                                {% elif evaluation.total_score >= 40 %}score-developing
+                                {% else %}score-inadequate{% endif %}">
+                                {{ evaluation.total_score }}
+                            </div>
+                            <div class="score-label">out of 100</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Analysis -->
+                <div class="category-analysis">
+                    <div class="score-header">
+                        <h2 class="section-title">🎯 Competency Breakdown</h2>
+                    </div>
+                    <div class="categories-grid">
+                        {% if evaluation.categories %}
+                            {% for category_key, category_data in evaluation.categories.items() %}
+                            <div class="category-item" data-category="{{ category_key }}">
+                                <div class="category-header">
+                                    <div class="category-name">{{ category_key.replace('_', ' ').title() }}</div>
+                                    <div class="category-score-section">
+                                        <div class="category-score
+                                            {% if category_data.score >= 8 %}score-excellent
+                                            {% elif category_data.score >= 6 %}score-proficient
+                                            {% elif category_data.score >= 4 %}score-developing
+                                            {% else %}score-inadequate{% endif %}">
+                                            {{ category_data.score }}/10
+                                        </div>
+                                        <div class="category-level
+                                            {% if category_data.level == 'EXCELLENT' %}level-excellent
+                                            {% elif category_data.level == 'PROFICIENT' %}level-proficient
+                                            {% elif category_data.level == 'DEVELOPING' %}level-developing
+                                            {% else %}level-inadequate{% endif %}">
+                                            {{ category_data.level }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="category-progress">
+                                    <div class="category-progress-fill 
+                                        {% if category_data.level == 'EXCELLENT' %}excellent
+                                        {% elif category_data.level == 'PROFICIENT' %}proficient
+                                        {% elif category_data.level == 'DEVELOPING' %}developing
+                                        {% else %}inadequate{% endif %}"
+                                        style="width: {{ (category_data.score * 10) }}%">
+                                    </div>
+                                </div>
+                                
+                                {% if category_data.evidence %}
+                                <div class="category-evidence">
+                                    "{{ category_data.evidence }}"
+                                </div>
+                                {% endif %}
+                                
+                                {% if category_data.feedback %}
+                                <div class="category-feedback">
+                                    {{ category_data.feedback }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Certification Status -->
+                <div class="summary-card">
+                    <div class="certification-status">
+                        <div class="cert-badge
+                            {% if evaluation.certification_result == 'CERTIFIED' %}cert-certified
+                            {% elif evaluation.certification_result == 'PROVISIONAL' %}cert-provisional
+                            {% else %}cert-not-certified{% endif %}">
+                            <span>
+                                {% if evaluation.certification_result == 'CERTIFIED' %}🏆
+                                {% elif evaluation.certification_result == 'PROVISIONAL' %}⚠️
+                                {% else %}❌{% endif %}
+                            </span>
+                            {{ evaluation.certification_result }}
+                        </div>
+                        {% if evaluation.certification_status %}
+                        <div class="cert-status-text">
+                            {{ evaluation.certification_status }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if evaluation.quality_indicators %}
+                    <div class="technical-metrics">
+                        <h3 class="section-title" style="font-size: 16px; margin-bottom: 16px;">🔍 Assessment Quality</h3>
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Video Quality</span>
+                                <span class="metric-value">{{ evaluation.quality_indicators.video_quality }}</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Audio Quality</span>
+                                <span class="metric-value">{{ evaluation.quality_indicators.audio_quality }}</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Duration</span>
+                                <span class="metric-value">{{ evaluation.quality_indicators.content_duration }}</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Reliability</span>
+                                <span class="metric-value">{{ evaluation.quality_indicators.assessment_reliability }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if evaluation.professional_strengths %}
+                <div class="summary-card strengths">
+                    <h3 class="section-title" style="font-size: 16px; margin-bottom: 16px;">✅ Professional Strengths</h3>
+                    <ul class="summary-list">
+                        {% for strength in evaluation.professional_strengths %}
+                        <li>
+                            <div class="list-icon">✓</div>
+                            <div class="list-text">{{ strength }}</div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if evaluation.competency_gaps %}
+                <div class="summary-card gaps">
+                    <h3 class="section-title" style="font-size: 16px; margin-bottom: 16px;">⚠️ Areas for Development</h3>
+                    <ul class="summary-list">
+                        {% for gap in evaluation.competency_gaps %}
+                        <li>
+                            <div class="list-icon">!</div>
+                            <div class="list-text">{{ gap }}</div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if evaluation.development_priorities %}
+                <div class="summary-card priorities">
+                    <h3 class="section-title" style="font-size: 16px; margin-bottom: 16px;">📈 Development Priorities</h3>
+                    <ul class="summary-list">
+                        {% for priority in evaluation.development_priorities %}
+                        <li>
+                            <div class="list-icon">→</div>
+                            <div class="list-text">{{ priority }}</div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if evaluation.recommended_actions %}
+        <!-- Recommendations Section -->
+        <div class="recommendations-section">
+            <h3 class="recommendations-title">
+                <span>💡</span>
+                Professional Development Recommendations
+            </h3>
+            <div class="recommendations-content">
+                {{ evaluation.recommended_actions }}
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <!-- Action Section -->
+        <div class="action-section">
+            <div class="action-buttons">
+                <a href="/upload" class="action-btn btn-new-assessment">
+                    <span>🎯</span>
+                    <span>New Assessment</span>
+                </a>
+                <a href="/" class="action-btn btn-secondary">
+                    <span>🏠</span>
+                    <span>Home</span>
+                </a>
+                <button onclick="window.print()" class="action-btn btn-secondary">
+                    <span>🖨️</span>
+                    <span>Print Results</span>
+                </button>
+                <button onclick="downloadReport()" class="action-btn btn-secondary">
+                    <span>📄</span>
+                    <span>Download PDF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animated particles
+        function createParticles() {
+            const particleContainer = document.querySelector('.bg-particles');
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                
+                const size = Math.random() * 3 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        // Score chart
+        function createScoreChart() {
+            const ctx = document.getElementById('scoreChart');
+            if (!ctx) return;
+            
+            const canvas = ctx.getContext('2d');
+            const score = {{ evaluation.total_score if evaluation else 0 }};
+            
+            // Determine color based on score
+            let color = '#ff6b7d'; // inadequate
+            if (score >= 80) color = '#56cc9d'; // excellent
+            else if (score >= 60) color = '#4facfe'; // proficient
+            else if (score >= 40) color = '#ffb347'; // developing
+
+            new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [score, 100 - score],
+                        backgroundColor: [
+                            color,
+                            'rgba(255, 255, 255, 0.1)'
+                        ],
+                        borderWidth: 0,
+                        cutout: '70%'
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        duration: 2000,
+                        easing: 'easeOutCubic'
+                    }
+                }
+            });
+        }
+
+        // Category progress animations
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.category-progress-fill');
+            
+            progressBars.forEach((bar, index) => {
+                setTimeout(() => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                }, index * 200);
+            });
+        }
+
+        // Staggered animations for category items
+        function animateCategoryItems() {
+            const categoryItems = document.querySelectorAll('.category-item');
+            
+            categoryItems.forEach((item, index) => {
+                item.style.animation = `fadeInUp 0.6s ease-out ${index * 0.1}s both`;
+            });
+        }
+
+        // Download report function
+        function downloadReport() {
+            // Create a simplified version for PDF
+            const printWindow = window.open('', '_blank');
+            const content = document.documentElement.outerHTML;
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>EvalPro Assessment Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .no-print { display: none; }
+                        @media print { .action-section { display: none; } }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                    <script>window.print(); window.close();</script>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+        }
+
+        // Scroll reveal effect
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.summary-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.8s ease-out';
+                observer.observe(card);
+            });
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.remove('loading');
+            createParticles();
+            createScoreChart();
+            
+            // Delay animations for better effect
+            setTimeout(() => {
+                animateProgressBars();
+                animateCategoryItems();
+                initScrollReveal();
+            }, 500);
+            
+            // Add hover effects to category items
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    item.style.transform = 'translateY(-4px) scale(1.02)';
+                    item.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.2)';
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    item.style.transform = 'translateY(0) scale(1)';
+                    item.style.boxShadow = 'none';
+                });
+            });
+        });
+
+        // Add some interactive elements
+        document.querySelectorAll('.cert-badge').forEach(badge => {
+            badge.addEventListener('click', () => {
+                badge.style.animation = 'bounce 0.6s ease-out';
+                setTimeout(() => {
+                    badge.style.animation = 'none';
+                }, 600);
+            });
+        });
+
+        // Add bounce animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounce {
+                0%, 20%, 60%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-10px); }
+                80% { transform: translateY(-5px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
